@@ -11,6 +11,7 @@ pipeline {
                 script {
                     env.DAY_OF_WEEK = sh(script: "date +%A", returnStdout: true).trim()
                 }
+                echo "${DAY_OF_WEEK}"
             }
         }
 
