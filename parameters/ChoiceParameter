@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'qa', 'prod'],
+            description: 'Select the environment to deploy to'
+        )
+    }
+
+    environment {
+        DEPLOY_SCRIPT_DIR = './scripts'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo "Checking out source code..."
+                // git url: 'https://your-repo-url.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo "Building the application..."
+                sh './build.sh'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    echo "Deploying to ${params.ENVIRONMENT} environment"
+
+                    if (params.ENVIRONMENT == 'prod') {
+                        sh "${env.DEPLOY_SCRIPT_DIR}/deploy-prod.sh"
+                    } else if (params.ENVIRONMENT == 'qa') {
+                        sh "${env.DEPLOY_SCRIPT_DIR}/deploy-qa.sh"
+                    } else {
+                        sh "${env.DEPLOY_SCRIPT_DIR}/deploy-dev.sh"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline execution completed for environment: ${params.ENVIRONMENT}"
+        }
+    }
+}
