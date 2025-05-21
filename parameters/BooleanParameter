@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Cloning repository...'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building the project...'
+                sh './home/mt25010/Jenkins/scripts/build.sh'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    if (params.ENABLE_FEATURE_NEW) {
+                        echo 'Running tests with Feature New enabled...'
+                        sh './run-tests --feature'
+                    } else {
+                        echo 'Running standard tests...'
+                        sh './run-tests'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Build complete. Feature New enabled: ${params.ENABLE_FEATURE_NEW}"
+        }
+    }
+}
