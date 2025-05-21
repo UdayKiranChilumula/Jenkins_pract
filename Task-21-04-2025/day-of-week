@@ -81,7 +81,7 @@ pipeline {
         }
 
         stage('Sunday') {
-Monday
+
             when {
                 environment name: 'DAY_OF_WEEK', value: 'Sunday'
             }
