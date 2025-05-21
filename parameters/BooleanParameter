@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh './home/mt25010/Jenkins/scripts/build.sh'
+                sh '/home/mt25010/Jenkins/scripts/build.sh'
             }
         }
 
