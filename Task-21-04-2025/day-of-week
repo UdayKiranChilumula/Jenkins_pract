@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+
+    environment {
+        DAY_OF_WEEK = ''
+    }
+
+    stages {
+        stage('Set Day') {
+            steps {
+                script {
+                    env.DAY_OF_WEEK = sh(script: "date +%A", returnStdout: true).trim()
+                }
+            }
+        }
+
+        stage('Monday') {
+
+            when {
+                environment name: 'DAY_OF_WEEK', value: 'Monday'
+            }
+
+            steps {
+                echo 'Monday'
+            }
+        }
+
+        stage('Tuesday') {
+
+            when {
+                environment name: 'DAY_OF_WEEK', value: 'Tuesday'
+            }
+
+            steps {
+                echo 'Tuesday'
+            }
+        }
+
+        stage('Wednesday') {
+
+            when {
+                environment name: 'DAY_OF_WEEK', value: 'Wednesday'
+            }
+
+            steps {
+                echo 'Wednesday'
+            }
+        }
+
+        stage('Thursday') {
+
+            when {
+                environment name: 'DAY_OF_WEEK', value: 'Thursday'
+            }
+
+            steps {
+                echo 'Thursday'
+            }
+        }
+
+        stage('Friday') {
+
+            when {
+                environment name: 'DAY_OF_WEEK', value: 'Friday'
+            }
+
+            steps {
+                echo 'Friday'
+            }
+        }
+
+        stage('Saturday') {
+
+            when {
+                environment name: 'DAY_OF_WEEK', value: 'Saturday'
+            }
+
+            steps {
+                echo 'Saturday'
+            }
+        }
+
+        stage('Sunday') {
+Monday
+            when {
+                environment name: 'DAY_OF_WEEK', value: 'Sunday'
+            }
+
+            steps {
+                echo 'Sunday'
+            }
+        }
+    }
+}
