@@ -20,10 +20,10 @@ pipeline {
                 script {
                     if (params.ENABLE_FEATURE_NEW) {
                         echo 'Running tests with Feature New enabled...'
-                        sh './run-tests --feature'
+                        sh '/home/mt25010/Jenkins/scripts/run-tests --feature'
                     } else {
                         echo 'Running standard tests...'
-                        sh './run-tests'
+                        sh '/home/mt25010/Jenkins/scripts/run-tests'
                     }
                 }
             }
