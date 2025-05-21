@@ -1,24 +1,21 @@
+def dayOfWeek = ''
+
 pipeline {
     agent any
-
-    environment {
-        // Predefine it empty (optional)
-        DAY_OF_WEEK = ''
-    }
 
     stages {
         stage('Set Day') {
             steps {
                 script {
-                    env.DAY_OF_WEEK = sh(script: "date +%A", returnStdout: true).trim()
-                    echo "Today is: ${env.DAY_OF_WEEK}"
+                    dayOfWeek = sh(script: "date +%A", returnStdout: true).trim()
+                    echo "Today is: ${dayOfWeek}"
                 }
             }
         }
 
         stage('Monday') {
             when {
-                expression { env.DAY_OF_WEEK == 'Monday' }
+                expression { dayOfWeek == 'Monday' }
             }
             steps {
                 echo 'It is Monday'
@@ -27,7 +24,7 @@ pipeline {
 
         stage('Tuesday') {
             when {
-                expression { env.DAY_OF_WEEK == 'Tuesday' }
+                expression { dayOfWeek == 'Tuesday' }
             }
             steps {
                 echo 'It is Tuesday'
@@ -36,7 +33,7 @@ pipeline {
 
         stage('Wednesday') {
             when {
-                expression { env.DAY_OF_WEEK == 'Wednesday' }
+                expression { dayOfWeek == 'Wednesday' }
             }
             steps {
                 echo 'It is Wednesday'
@@ -45,7 +42,7 @@ pipeline {
 
         stage('Thursday') {
             when {
-                expression { env.DAY_OF_WEEK == 'Thursday' }
+                expression { dayOfWeek == 'Thursday' }
             }
             steps {
                 echo 'It is Thursday'
@@ -54,7 +51,7 @@ pipeline {
 
         stage('Friday') {
             when {
-                expression { env.DAY_OF_WEEK == 'Friday' }
+                expression { dayOfWeek == 'Friday' }
             }
             steps {
                 echo 'It is Friday'
@@ -63,7 +60,7 @@ pipeline {
 
         stage('Saturday') {
             when {
-                expression { env.DAY_OF_WEEK == 'Saturday' }
+                expression { dayOfWeek == 'Saturday' }
             }
             steps {
                 echo 'It is Saturday'
@@ -72,7 +69,7 @@ pipeline {
 
         stage('Sunday') {
             when {
-                expression { env.DAY_OF_WEEK == 'Sunday' }
+                expression { dayOfWeek == 'Sunday' }
             }
             steps {
                 echo 'It is Sunday'
