@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    environment {
+        REPO_URL = 'https://github.com/UdayKiranChilumula/Jenkins_pract.git'
+        SCRIPT_DIR = '/home/mt25010/Jenkins/scripts'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo "Checking out code from ref: ${params.GIT_REF}"
+                git branch: "${params.GIT_REF}", url: "${env.REPO_URL}"
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo "Building code from ${params.GIT_REF}..."
+                sh "${SCRIPT_DIR}/build.sh"
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo "Running tests..."
+                sh "${SCRIPT_DIR}/run-tests --feature"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline completed for GIT_REF: ${params.GIT_REF}"
+        }
+        failure {
+            echo "Build failed for GIT_REF: ${params.GIT_REF}"
+        }
+    }
+}
