@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    environment {
+        REPO_URL = 'https://github.com/udaykiranchilumula/system_metrics.git'
+    }
+
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git branch: 'main', url: "${REPO_URL}"
+            }
+        }
+
+        stage('Run System Metrics Script') {
+            steps {
+                sh './system_metrics.sh'
+            }
+        }
+    }
+}
