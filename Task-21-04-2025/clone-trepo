@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        REPO_URL = 'https://github.com/udaykiranchilumula/system_metrics.git'
+        REPO_URL = 'https://github.com/UdayKiranChilumula/system_metrics.git'
     }
 
     stages {
