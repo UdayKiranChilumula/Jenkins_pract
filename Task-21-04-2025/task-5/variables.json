@@ -1,0 +1,25 @@
+{
+  "project_name": "Helping Hands",
+  "maintainer": "Uday Kiran Chilumula",
+  "version": "2.3.1",
+  "environment": "production",
+  "services": [
+    {
+      "name": "auth-service",
+      "port": 8080,
+      "status": "active"
+    },
+    {
+      "name": "payment-service",
+      "port": 8081,
+      "status": "inactive"
+    },
+    {
+      "name": "campaign-service",
+      "port": 8082,
+      "status": "active"
+    }
+  ],
+  "deploy_time": "2025-05-22T14:30:00Z",
+  "region": "ap-south-1"
+}

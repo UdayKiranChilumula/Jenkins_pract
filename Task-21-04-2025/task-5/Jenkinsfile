@@ -1,0 +1,19 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git credentialsId: 'uday',
+                    url: 'https://github.com/UdayKiranChilumula/Jenkins_pract.git',
+                    branch: 'main'
+            }
+        }
+
+        stage('Read JSON using Python') {
+            steps {
+                sh 'python3 json_reader.py'
+            }
+        }
+    }
+}
