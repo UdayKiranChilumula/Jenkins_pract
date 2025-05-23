@@ -6,17 +6,17 @@ pipeline {
     }
 
     stages {
-        stage('Clone Repo') {
-            steps {
-                git branch: 'main',
-                credentialsId: 'uday',
-                url: "${REPO_URL}"
-            }
-        }
+        // stage('Clone Repo') {
+        //     steps {
+        //         git branch: 'main',
+        //         credentialsId: 'uday',
+        //         url: "${REPO_URL}"
+        //     }
+        // }
 
         stage('Run System Metrics Script') {
             steps {
-                sh './system_metrics.sh'
+                sh '/var/lib/jenkins/workspace/MT25010-Uday/Task-21-05-2025/clone-repo/Task-21-04-2025/system_metrics.sh'
             }
         }
     }
