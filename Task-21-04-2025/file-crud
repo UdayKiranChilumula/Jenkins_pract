@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Perform File Operation') {
+            steps {
+                script {
+                    def file = "${params.FILE_NAME}"
+                    def content = params.FILE_CONTENT
+                    def action = params.ACTION
+
+                    echo "Performing '${action}' operation on file '${file}'"
+
+                    if (action == 'create') {
+                        writeFile file: file, text: content
+                        echo "File '${file}' created with content:\n${content}"
+
+                    } else if (action == 'read') {
+                        if (fileExists(file)) {
+                            def readContent = readFile(file)
+                            echo "Contents of '${file}':\n${readContent}"
+                        } else {
+                            echo "File '${file}' does not exist!"
+                        }
+
+                    } else if (action == 'update') {
+                        if (fileExists(file)) {
+                            writeFile file: file, text: content
+                            echo "File '${file}' updated with new content:\n${content}"
+                        } else {
+                            echo "File '${file}' not found. Cannot update!"
+                        }
+
+                    } else if (action == 'delete') {
+                        if (fileExists(file)) {
+                            sh "rm -f ${file}"
+                            echo "File '${file}' deleted."
+                        } else {
+                            echo "File '${file}' does not exist!"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
