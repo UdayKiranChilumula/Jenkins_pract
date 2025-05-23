@@ -1,7 +1,7 @@
 import json
 
 def read_variables():
-    with open('variables.json', 'r') as f:
+    with open('./variables.json', 'r') as f:
         data = json.load(f)
     
     print("Project Configuration:")
