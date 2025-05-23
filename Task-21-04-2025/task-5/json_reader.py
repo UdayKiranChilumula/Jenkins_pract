@@ -1,7 +1,7 @@
 import json
 
 def read_variables():
-    with open('./variables.json', 'r') as f:
+    with open('/var/lib/jenkins/workspace/MT25010-Uday/Task-21-05-2025/task-5-json-reader/Task-21-04-2025/task-5/variables.json', 'r') as f:
         data = json.load(f)
     
     print("Project Configuration:")
