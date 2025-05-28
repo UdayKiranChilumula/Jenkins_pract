@@ -14,25 +14,23 @@ pipeline {
                         keyFileVariable: 'SSH_KEY',
                         usernameVariable: 'SSH_USER'
                     )]) {
-                        sh """
-                            ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} << 'ENDSSH'
-                            echo "Logged in as: \$(whoami)"
-                            echo "Running on: \$(hostname)"
+                        // Log in and verify connection
+                        sh "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} 'whoami && hostname'"
 
-                            echo "Updating system packages using dnf..."
-                            sudo dnf update -y
+                        // Update packages
+                        sh "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} 'sudo dnf update -y'"
 
-                            echo "Installing Nginx using dnf..."
-                            sudo dnf install -y nginx
+                        // Install nginx
+                        sh "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} 'sudo dnf install -y nginx'"
 
-                            echo "Starting and enabling Nginx service..."
-                            sudo systemctl start nginx
-                            sudo systemctl enable nginx
+                        // Start nginx
+                        sh "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} 'sudo systemctl start nginx'"
 
-                            echo "Nginx status:"
-                            sudo systemctl status nginx | head -n 10
-                            ENDSSH
-                        """
+                        // Enable nginx to start on boot
+                        sh "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} 'sudo systemctl enable nginx'"
+
+                        // Check nginx status
+                        sh "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} 'sudo systemctl status nginx | head -n 10'"
                     }
                 }
             }
