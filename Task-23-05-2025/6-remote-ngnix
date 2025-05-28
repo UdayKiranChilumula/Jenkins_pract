@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    environment {
+        REMOTE_HOST = "44.204.13.61"      
+        SSH_USER = "ec2-user"                   
+        SSH_CREDENTIALS_ID = "ssh-private-key-ec2"     
+    }
+
+    stages {
+        stage('Install Nginx via SSH') {
+            steps {
+                sshagent (credentials: [env.SSH_CREDENTIALS_ID]) {
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ${SSH_USER}@${REMOTE_HOST} << 'ENDSSH'
+                        set -e
+                        echo "Updating system..."
+                        if [ -f /etc/redhat-release ]; then
+                            sudo yum update -y
+                            sudo yum install nginx -y
+                        elif [ -f /etc/lsb-release ] || [ -f /etc/debian_version ]; then
+                            sudo apt update -y
+                            sudo apt install nginx -y
+                        fi
+
+                        echo "Starting and enabling Nginx..."
+                        sudo systemctl start nginx
+                        sudo systemctl enable nginx
+
+                        echo "Nginx is running:"
+                        sudo systemctl status nginx | head -n 10
+                    ENDSSH
+                    """
+                }
+            }
+        }
+    }
+}
