@@ -2,41 +2,43 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_HOST = "44.204.13.61"      
-        SSH_USER = "ec2-user"
-        // Assume this is a Secret Text credential containing the private key
-        SSH_PRIVATE_KEY = credentials('ssh-private-key-ec2')
+        SERVER_IP = '44.204.13.61'
     }
 
     stages {
-        stage('Install Nginx via SSH (No Plugin)') {
+        stage('Deploy Nginx on Remote Server') {
             steps {
-                sh '''
-                    echo "Setting up SSH key..."
-                    mkdir -p ~/.ssh
-                    echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-                    chmod 600 ~/.ssh/id_rsa
+                script {
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: 'ssh-private-key-ec2',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )]) {
+                        sh """
+                            ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} << 'ENDSSH'
+                            echo "Logged in as: \$(whoami)"
+                            echo "Running on: \$(hostname)"
 
-                    echo "Connecting to remote host and installing Nginx..."
-                    ssh -o StrictHostKeyChecking=no ${SSH_USER}@${REMOTE_HOST} << 'ENDSSH'
-                        set -e
-                        echo "Updating system..."
-                        if [ -f /etc/redhat-release ]; then
-                            sudo yum update -y
-                            sudo yum install nginx -y
-                        elif [ -f /etc/lsb-release ] || [ -f /etc/debian_version ]; then
-                            sudo apt update -y
-                            sudo apt install nginx -y
-                        fi
+                            echo "Updating package list..."
+                            sudo apt-get update -y || sudo yum update -y
 
-                        echo "Starting and enabling Nginx..."
-                        sudo systemctl start nginx
-                        sudo systemctl enable nginx
+                            echo "Installing Nginx..."
+                            if command -v apt-get >/dev/null; then
+                                sudo apt-get install -y nginx
+                            elif command -v yum >/dev/null; then
+                                sudo yum install -y nginx
+                            fi
 
-                        echo "Nginx is running:"
-                        sudo systemctl status nginx | head -n 10
-                    ENDSSH
-                '''
+                            echo "Starting and enabling Nginx..."
+                            sudo systemctl start nginx
+                            sudo systemctl enable nginx
+
+                            echo "Nginx status:"
+                            sudo systemctl status nginx | head -n 10
+                            ENDSSH
+                        """
+                    }
+                }
             }
         }
     }
