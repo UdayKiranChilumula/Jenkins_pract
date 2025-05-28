@@ -1,0 +1,85 @@
+pipeline {
+    agent any
+
+    parameters {
+        // File parameter: user uploads file when triggering build
+        file(name: 'UPLOAD_FILE', description: 'Upload the file to encrypt and send')
+        string(name: 'RECIPIENT_EMAIL', defaultValue: '', description: 'Recipient email address')
+        string(name: 'EMAIL_SUBJECT', defaultValue: 'Confidential Encrypted File', description: 'Email subject')
+        password(name: 'ENCRYPTION_PASSWORD', defaultValue: '', description: 'Password to encrypt the file')
+    }
+
+    environment {
+        ENCRYPTED_FILE = "encrypted_output.enc"
+        HASH_FILE = "file.sha256"
+    }
+
+    stages {
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    if (!params.RECIPIENT_EMAIL) {
+                        error "RECIPIENT_EMAIL parameter is required"
+                    }
+                    if (!params.ENCRYPTION_PASSWORD) {
+                        error "ENCRYPTION_PASSWORD parameter is required"
+                    }
+                }
+            }
+        }
+
+        stage('Calculate SHA256 Hash') {
+            steps {
+                // The uploaded file will be saved in workspace as params.UPLOAD_FILE
+                sh "sha256sum ${params.UPLOAD_FILE} | awk '{print \$1}' > ${env.HASH_FILE}"
+            }
+        }
+
+        stage('Encrypt File') {
+            steps {
+                sh """
+                    openssl enc -aes-256-cbc -salt -in ${params.UPLOAD_FILE} -out ${env.ENCRYPTED_FILE} -pass pass:${params.ENCRYPTION_PASSWORD}
+                """
+            }
+        }
+
+        stage('Send Important Email') {
+            steps {
+                script {
+                    def hashContent = readFile(env.HASH_FILE).trim()
+
+                    emailext (
+                        to: params.RECIPIENT_EMAIL,
+                        subject: params.EMAIL_SUBJECT,
+                        body: """\
+Hello,
+
+Please find the confidential file attached. The file has been encrypted using AES-256-CBC.
+
+SHA256 hash of the original file:
+${hashContent}
+
+Use the agreed password to decrypt the file.
+
+Best regards,
+Jenkins
+""",
+                        attachmentsPattern: env.ENCRYPTED_FILE,
+                        mimeType: 'text/plain',
+                        headers: [
+                            ['X-Priority', '1 (Highest)'],
+                            ['X-MSMail-Priority', 'High'],
+                            ['Importance', 'High']
+                        ]
+                    )
+                }
+            }
+        }
+    }
+
+    post {
+        cleanup {
+            sh "rm -f ${env.ENCRYPTED_FILE} ${env.HASH_FILE} ${params.UPLOAD_FILE}"
+        }
+    }
+}
