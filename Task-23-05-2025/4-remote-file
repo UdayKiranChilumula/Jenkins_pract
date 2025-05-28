@@ -10,7 +10,7 @@ pipeline {
             steps {
                 withCredentials([
                     file(credentialsId: 'my-config-file', variable: 'LOCAL_FILE'),
-                    sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
+                    sshUserPrivateKey(credentialsId: 'ssh-private-key-ec2', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
                 ]) {
                     sh """
                         echo "Using local file: \$LOCAL_FILE"
