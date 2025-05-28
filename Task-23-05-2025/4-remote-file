@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+    environment {
+        REMOTE_HOST = '44.204.13.61' 
+        REMOTE_PATH = '/home/ec2-user/RemoteDir/'
+    }
+
+    stages {
+        stage('Retrieve & Copy File to Remote Server') {
+            steps {
+                withCredentials([
+                    file(credentialsId: 'my-config-file', variable: 'LOCAL_FILE'),
+                    sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
+                ]) {
+                    sh """
+                        echo "Using local file: \$LOCAL_FILE"
+                        
+                        # Copy the file to the remote server
+                        scp -i \$SSH_KEY -o StrictHostKeyChecking=no \$LOCAL_FILE \$SSH_USER@${REMOTE_HOST}:\$REMOTE_PATH
+                        
+                        # Print file contents remotely
+                        ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \$SSH_USER@${REMOTE_HOST} 'echo "Contents of file on remote:" && cat \$REMOTE_PATH'
+                    """
+                }
+            }
+        }
+    }
+}
