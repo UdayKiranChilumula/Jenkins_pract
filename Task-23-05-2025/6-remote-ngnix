@@ -2,15 +2,15 @@ pipeline {
     agent any
 
     environment {
-        SERVER_IP = '44.204.13.61'
+        SERVER_IP = '44.204.13.61' // Replace with your EC2 public IP
     }
 
     stages {
-        stage('Deploy Nginx on Remote Server') {
+        stage('Deploy Nginx on Amazon Linux EC2') {
             steps {
                 script {
                     withCredentials([sshUserPrivateKey(
-                        credentialsId: 'ssh-private-key-ec2',
+                        credentialsId: 'ssh-private-key-ec2', // Jenkins SSH key credential ID
                         keyFileVariable: 'SSH_KEY',
                         usernameVariable: 'SSH_USER'
                     )]) {
@@ -19,17 +19,13 @@ pipeline {
                             echo "Logged in as: \$(whoami)"
                             echo "Running on: \$(hostname)"
 
-                            echo "Updating package list..."
-                            sudo apt-get update -y || sudo yum update -y
+                            echo "Updating system packages using dnf..."
+                            sudo dnf update -y
 
-                            echo "Installing Nginx..."
-                            if command -v apt-get >/dev/null; then
-                                sudo apt-get install -y nginx
-                            elif command -v yum >/dev/null; then
-                                sudo yum install -y nginx
-                            fi
+                            echo "Installing Nginx using dnf..."
+                            sudo dnf install -y nginx
 
-                            echo "Starting and enabling Nginx..."
+                            echo "Starting and enabling Nginx service..."
                             sudo systemctl start nginx
                             sudo systemctl enable nginx
 
