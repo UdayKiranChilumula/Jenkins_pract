@@ -19,7 +19,7 @@ pipeline {
                         scp -i \$SSH_KEY -o StrictHostKeyChecking=no \$LOCAL_FILE \$SSH_USER@${REMOTE_HOST}:\$REMOTE_PATH
                         
                         
-                        ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \$SSH_USER@${REMOTE_HOST} 'echo "Contents of file on remote:" && cat \$REMOTE_PATH\config.txt'
+                        ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \$SSH_USER@${REMOTE_HOST} 'echo "Contents of file on remote:" && cat \$REMOTE_PATH/config.txt'
                     """
                 }
             }
