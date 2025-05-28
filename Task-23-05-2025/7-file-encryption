@@ -1,12 +1,7 @@
 pipeline {
     agent any
 
-    parameters {
-        base64File(name: 'UPLOAD_FILE', description: 'Upload base64 encoded file')
-        string(name: 'RECIPIENT_EMAIL', defaultValue: '', description: 'Recipient email address')
-        string(name: 'EMAIL_SUBJECT', defaultValue: 'Confidential Encrypted File', description: 'Email subject')
-        password(name: 'ENCRYPTION_PASSWORD', defaultValue: '', description: 'Password to encrypt the file')
-    }
+    
 
     environment {
         UPLOAD_FILE_PATH = 'uploaded_file'        // decoded original file
