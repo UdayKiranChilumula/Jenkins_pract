@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    environment {
+        SERVER_IP = '44.204.13.61' 
+    }
+    stages {
+        stage('SSH Username with Private Key') {
+            steps {
+                script {
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: 'ssh-private-key-ec2',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )]) {
+                        sh "echo 'SSH private key is located at ${SSH_KEY}'"
+                        sh "echo 'SSH user is ${SSH_USER}'"
+                        sh "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} whoami && hostname"
+                    }
+                }
+            }
+        }
+    }
+}
