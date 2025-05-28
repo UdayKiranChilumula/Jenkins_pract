@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+
+    environment {
+        REMOTE_USER = 'ec2-user'
+    }
+
+    stages {
+        stage('Install Language on Remote Server') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: 'ssh-private-key-ec2', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
+                ]) {
+                    script {
+                        def installCommand = ""
+
+                        if (params.LANGUAGE == "Python") {
+                            installCommand = """
+                                sudo yum update -y
+                                sudo yum install gcc openssl-devel bzip2-devel libffi-devel wget -y
+                                cd /usr/src
+                                sudo wget https://www.python.org/ftp/python/${params.VERSION}/Python-${params.VERSION}.tgz
+                                sudo tar xzf Python-${params.VERSION}.tgz
+                                cd Python-${params.VERSION}
+                                sudo ./configure --enable-optimizations
+                                sudo make altinstall
+                                python${params.VERSION} --version
+                            """
+                        } else if (params.LANGUAGE == "Java") {
+                            installCommand = """
+                                sudo yum update -y
+                                sudo amazon-linux-extras enable java-openjdk${params.VERSION}
+                                sudo yum install java-${params.VERSION}-openjdk -y
+                                java -version
+                            """
+                        }
+
+                        sh """
+                            echo "Installing ${params.LANGUAGE} ${params.VERSION} on ${params.REMOTE_IP}"
+                            ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \$SSH_USER@${params.REMOTE_IP} '${installCommand}'
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
