@@ -17,7 +17,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Running build for ${JOB_NAME} #${BUILD_NUMBER}"
-                error("Simulating failure")
+                //error("Simulating failure")
             }
         }
     }
