@@ -1,26 +1,41 @@
 pipeline {
     agent any
+
     environment {
-        REMOTE_HOST = '44.204.13.61' 
-        REMOTE_PATH = '/home/ec2-user/RemoteDir/'
+        REMOTE_HOST = "44.204.13.61"
     }
 
     stages {
-        stage('Retrieve & Copy File to Remote Server') {
+        stage('Install Nginx via SSH (No Plugin)') {
             steps {
                 withCredentials([
-                    file(credentialsId: 'my-config-file', variable: 'LOCAL_FILE'),
                     sshUserPrivateKey(credentialsId: 'ssh-private-key-ec2', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
                 ]) {
-                    sh """
-                        echo "Using local file: \$LOCAL_FILE"
-                        
-                        # Copy the file to the remote server
-                        scp -i \$SSH_KEY -o StrictHostKeyChecking=no \$LOCAL_FILE \$SSH_USER@${REMOTE_HOST}:${REMOTE_PATH}
-                        
-                        # Print the contents of the file on remote EC2
-                        ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \$SSH_USER@${REMOTE_HOST} 'echo "Contents of file on remote:" && cat ${REMOTE_PATH}config.txt'
-                    """
+                    sh '''
+                        echo "Setting up SSH private key permissions..."
+                        chmod 600 $SSH_KEY
+
+                        echo "Connecting to remote host and installing Nginx..."
+
+                        ssh -i $SSH_KEY -o StrictHostKeyChecking=no $SSH_USER@$REMOTE_HOST << 'ENDSSH'
+                            set -e
+                            echo "Updating system..."
+                            if [ -f /etc/redhat-release ]; then
+                                sudo yum update -y
+                                sudo yum install nginx -y
+                            elif [ -f /etc/lsb-release ] || [ -f /etc/debian_version ]; then
+                                sudo apt update -y
+                                sudo apt install nginx -y
+                            fi
+
+                            echo "Starting and enabling Nginx..."
+                            sudo systemctl start nginx
+                            sudo systemctl enable nginx
+
+                            echo "Nginx is running:"
+                            sudo systemctl status nginx | head -n 10
+                        ENDSSH
+                    '''
                 }
             }
         }
