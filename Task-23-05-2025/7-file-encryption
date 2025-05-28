@@ -3,7 +3,7 @@ pipeline {
 
     parameters {
         // File parameter: user uploads file when triggering build
-        file(name: 'UPLOAD_FILE', description: 'Upload the file to encrypt and send')
+        
         string(name: 'RECIPIENT_EMAIL', defaultValue: '', description: 'Recipient email address')
         string(name: 'EMAIL_SUBJECT', defaultValue: 'Confidential Encrypted File', description: 'Email subject')
         password(name: 'ENCRYPTION_PASSWORD', defaultValue: '', description: 'Password to encrypt the file')
