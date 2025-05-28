@@ -1,0 +1,34 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    
+                    def buildInputs = ['Amar', 'Uday', 'Rishak']
+
+
+                    def parallelStages = [:]
+
+                    
+                    for (int i = 0; i < buildInputs.size(); i++) {
+                        def input = buildInputs[i]
+
+                
+                        parallelStages["Build ${input}"] = {
+                            stage("Build ${input}") {
+                                echo "Building ${input}..."
+                        
+                                sh "echo Simulating build for ${input}"
+                            }
+                        }
+                    }
+
+                
+                    parallel parallelStages
+                }
+            }
+        }
+    }
+}
