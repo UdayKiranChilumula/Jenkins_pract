@@ -56,12 +56,7 @@ Best regards,
 Jenkins
 """,
                     attachmentsPattern: env.ENCRYPTED_FILE,
-                    mimeType: 'text/plain',
-                    headers: [
-                        ['X-Priority', '1 (Highest)'],
-                        ['X-MSMail-Priority', 'High'],
-                        ['Importance', 'High']
-                    ]
+                    mimeType: 'text/plain'
                 )
             }
         }
