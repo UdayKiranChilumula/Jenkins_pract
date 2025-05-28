@@ -1,0 +1,72 @@
+pipeline {
+    agent any
+
+    environment {
+
+        SUCCESS_RECIPIENT = 'uday.chilumula@modak.com'
+        FAILURE_RECIPIENT = 'mahesh.kasa@modak.com'
+
+    
+        JENKINS_URL = "${env.JENKINS_URL}"
+        JOB_NAME = "${env.JOB_NAME}"
+        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+        BUILD_URL = "${env.BUILD_URL}"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                echo "Running build for ${JOB_NAME} #${BUILD_NUMBER}"
+                error("Simulating failure")
+            }
+        }
+    }
+
+    post {
+        success {
+            script {
+                emailext(
+                    subject: "SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}",
+                    body: """
+Hello Team,
+
+The Jenkins pipeline completed successfully.
+
+Jenkins Server: ${JENKINS_URL}  
+Pipeline: ${JOB_NAME}  
+Build Number: #${BUILD_NUMBER}  
+Build URL: ${BUILD_URL}
+
+Thanks,  
+Jenkins
+""",
+                    to: "${SUCCESS_RECIPIENT}"
+                )
+            }
+        }
+
+        failure {
+            script {
+                emailext(
+                    subject: "FAILURE: ${JOB_NAME} #${BUILD_NUMBER}",
+                    body: """
+Hello Team,
+
+The Jenkins pipeline has failed.
+
+Jenkins Server: ${JENKINS_URL}  
+Pipeline: ${JOB_NAME}  
+Build Number: #${BUILD_NUMBER}  
+Console Output: ${BUILD_URL}console
+
+Please investigate the issue.
+
+Thanks,  
+Jenkins
+""",
+                    to: "${FAILURE_RECIPIENT}"
+                )
+            }
+        }
+    }
+}
