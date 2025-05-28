@@ -1,45 +1,57 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'SERVER_IP', defaultValue: '44.204.13.61', description: 'Enter the IP address of the remote server')
+        choice(name: 'LANGUAGE', choices: ['Python', 'Java'], description: 'Select the language to install')
+        string(name: 'VERSION', defaultValue: '3.11', description: 'Enter the version (e.g., 3.11 for Python, 17 for Java)')
+    }
 
     environment {
-        REMOTE_USER = 'ec2-user'
+        REMOTE_IP = "${params.SERVER_IP}"
+        INSTALL_LANG = "${params.LANGUAGE}"
+        LANG_VERSION = "${params.VERSION}"
     }
 
     stages {
         stage('Install Language on Remote Server') {
             steps {
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: 'ssh-private-key-ec2', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
-                ]) {
-                    script {
-                        def installCommand = ""
+                script {
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: 'ssh-private-key-ec2',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )]) {
+                        // Show basic info
+                        sh "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${REMOTE_IP} 'whoami && hostname'"
 
-                        if (params.LANGUAGE == "Python") {
-                            installCommand = """
-                                sudo yum update -y
-                                sudo yum install gcc openssl-devel bzip2-devel libffi-devel wget -y
-                                cd /usr/src
-                                sudo wget https://www.python.org/ftp/python/${params.VERSION}/Python-${params.VERSION}.tgz
-                                sudo tar xzf Python-${params.VERSION}.tgz
-                                cd Python-${params.VERSION}
-                                sudo ./configure --enable-optimizations
-                                sudo make altinstall
-                                python${params.VERSION} --version
+                        if (INSTALL_LANG == 'Python') {
+                            echo "Installing Python ${LANG_VERSION}"
+                            sh """
+                                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${REMOTE_IP} '
+                                    sudo dnf update -y &&
+                                    sudo dnf install -y gcc openssl-devel bzip2-devel libffi-devel wget make &&
+                                    wget https://www.python.org/ftp/python/${LANG_VERSION}/Python-${LANG_VERSION}.tgz &&
+                                    tar xvf Python-${LANG_VERSION}.tgz &&
+                                    cd Python-${LANG_VERSION} &&
+                                    ./configure --enable-optimizations &&
+                                    make -j 2 &&
+                                    sudo make altinstall &&
+                                    python${LANG_VERSION} --version
+                                '
                             """
-                        } else if (params.LANGUAGE == "Java") {
-                            installCommand = """
-                                sudo yum update -y
-                                sudo amazon-linux-extras enable java-openjdk${params.VERSION}
-                                sudo yum install java-${params.VERSION}-openjdk -y
-                                java -version
+                        } else if (INSTALL_LANG == 'Java') {
+                            echo "Installing Java ${LANG_VERSION}"
+                            sh """
+                                ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SSH_USER}@${REMOTE_IP} '
+                                    sudo dnf update -y &&
+                                    sudo dnf install -y java-${LANG_VERSION}-amazon-corretto-devel &&
+                                    java -version
+                                '
                             """
+                        } else {
+                            error "Unsupported language selected."
                         }
-
-                        sh """
-                            echo "Installing ${params.LANGUAGE} ${params.VERSION} on ${params.REMOTE_IP}"
-                            ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \$SSH_USER@${params.REMOTE_IP} '${installCommand}'
-                        """
                     }
                 }
             }
