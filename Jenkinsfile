@@ -19,7 +19,7 @@ pipeline {
             '''
         }
         failure{
-            echo 'this will execute as we caused a failure'
+            echo 'this will execute as we caused a failre'
         }
         success{
             echo 'this wont execute as one of the stage is failed'
